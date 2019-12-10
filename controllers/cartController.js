@@ -51,6 +51,36 @@ let cartController = {
           })
       })
     })
+  },
+  addCartItem: (req, res) => {
+    CartItem.findByPk(req.params.id).then(cartItem => {
+      cartItem
+        .update({
+          quantity: cartItem.quantity + 1
+        })
+        .then(cartItem => {
+          return res.redirect('back')
+        })
+    })
+  },
+  subCartItem: (req, res) => {
+    CartItem.findByPk(req.params.id).then(cartItem => {
+      // if quantity is already 1 then be 1
+      cartItem
+        .update({
+          quantity: cartItem.quantity - 1 >= 1 ? cartItem.quantity - 1 : 1
+        })
+        .then(cartItem => {
+          return res.redirect('back')
+        })
+    })
+  },
+  deleteCartItem: (req, res) => {
+    CartItem.findByPk(req.params.id).then(cartItem => {
+      cartItem.destroy().then(cartItem => {
+        return res.redirect('back')
+      })
+    })
   }
 }
 
