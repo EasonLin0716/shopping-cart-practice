@@ -1,5 +1,7 @@
 const db = require('../models')
 const Order = db.Order
+const OrderItem = db.OrderItem
+const Cart = db.Cart
 
 let orderController = {
   getOrders: (req, res) => {
@@ -7,6 +9,46 @@ let orderController = {
       return res.render('orders', {
         orders
       })
+    })
+  },
+  postOrder: (req, res) => {
+    return Cart.findByPk(req.body.cartId, { include: 'items' }).then(cart => {
+      return Order.create({
+        name: req.body.name,
+        address: req.body.address,
+        phone: req.body.phone,
+        shipping_status: req.body.shipping_status,
+        payment_status: req.body.payment_status,
+        amount: req.body.amount
+      }).then(order => {
+        var results = []
+        for (var i = 0; i < cart.items.length; i++) {
+          console.log(order.id, cart.items[i].id)
+          results.push(
+            OrderItem.create({
+              OrderId: order.id,
+              ProductId: cart.items[i].id,
+              price: cart.items[i].price,
+              quantity: cart.items[i].CartItem.quantity
+            })
+          )
+        }
+        // 需確認所有 create 動作都完成才能導回 /orders
+        return Promise.all(results).then(() => res.redirect('/orders'))
+      })
+    })
+  },
+  cancelOrder: (req, res) => {
+    return Order.findByPk(req.params.id, {}).then(order => {
+      order
+        .update({
+          ...req.body,
+          shipping_status: '-1',
+          payment_status: '-1'
+        })
+        .then(order => {
+          return res.redirect('back')
+        })
     })
   }
 }
