@@ -1,7 +1,16 @@
 const db = require('../models')
+const nodemailer = require('nodemailer')
 const Order = db.Order
 const OrderItem = db.OrderItem
 const Cart = db.Cart
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_ACCOUNT,
+    pass: process.env.GMAIL_PASSWORD
+  }
+})
 
 let orderController = {
   getOrders: (req, res) => {
@@ -33,6 +42,20 @@ let orderController = {
             })
           )
         }
+        var mailOptions = {
+          from: process.env.GMAIL_ACCOUNT,
+          to: 'newman0934@gmail.com, uu9924079+ta@gmail.com',
+          subject: `感謝您購買 AC Shop 的商品`,
+          text: `${order.id} 訂單成立`
+        }
+
+        transporter.sendMail(mailOptions, function(error, info) {
+          if (error) {
+            console.log(error)
+          } else {
+            console.log('Email sent: ' + info.response)
+          }
+        })
         // 需確認所有 create 動作都完成才能導回 /orders
         return Promise.all(results).then(() => res.redirect('/orders'))
       })

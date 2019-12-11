@@ -6,7 +6,9 @@ var logger = require('morgan')
 const exphbs = require('express-handlebars')
 const session = require('express-session')
 const methodOverride = require('method-override')
-
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 var indexRouter = require('./routes/index')
 var usersRouter = require('./routes/users')
 
